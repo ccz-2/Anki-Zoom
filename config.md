@@ -1,4 +1,4 @@
-### Anki Zoom v1.1 Config:  
+### Anki Zoom v1.1.1 Config:  
 All config is effective immediately
 
 -   `deckBrowser_zoom_default`: Zoom level that the reset button applies for the deck browser

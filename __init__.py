@@ -1,6 +1,6 @@
 # Anki Zoom
-# v1.1 3/2/2020
-# Copyright Â© 2020 Quip13 (random.emailforcrap@gmail.com)
+# v1.1.1 3/2/2020
+# Copyright © 2020 Quip13 (random.emailforcrap@gmail.com)
 # Based in part on code by Damien Elmes <anki@ichi2.net>, Roland Sieker <ospalh@gmail.com> and github.com/krassowski
 # Big thanks to u/Glutanimate and u/yumenogotoshi for code suggestions
 # License: GNU GPL, version 3 or later; http://www.gnu.org/copyleft/gpl.html
@@ -45,13 +45,12 @@ def change_zoom(zoom_lvl):
     mw.web.setZoomFactor(zoom_lvl)
 
 def set_save_zoom(new_state, old_state, *args):
-    def unpause():
-        mw.setUpdatesEnabled(True)
-
-    mw.setUpdatesEnabled(False)
-    old_state_zoom = QWebEngineView.zoomFactor(mw.web)
     if old_state == new_state: #skips if reset
         return
+    def unpause():
+        mw.setUpdatesEnabled(True)
+    old_state_zoom = QWebEngineView.zoomFactor(mw.web)
+    mw.setUpdatesEnabled(False)
     config = mw.addonManager.getConfig(__name__)
 
     if old_state == 'deckBrowser':
