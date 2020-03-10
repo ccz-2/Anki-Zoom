@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>xZoom</title>
+<link type="text/css" rel="stylesheet" media="all" href="https://unpkg.com/xzoom/dist/xzoom.css" />
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+<script type="text/javascript" src="xzoom_ndfs.js"></script>
+<script type="text/javascript">
+(function ($) {
+    $(document).ready(function() {
+
+        //Multiple Zooms on one page
+        $('#qa img').each(function() {
+            src = $(this).attr("src");
+            $(this).attr("xoriginal", src)
+            var instance = $(this).xzoom({
+                zoomWidth: Number.MAX_SAFE_INTEGER,
+                zoomHeight: Number.MAX_SAFE_INTEGER,
+                position: 'inside',
+                defaultScale: 2,
+                lens: "#ffffff",
+                smoothZoomMove: 3,
+                smoothScale: 6,
+                lensCollision: true,
+                hover: true,
+                openOnSmall: false
+            });
+            instance.eventunbind()
+            $(this).click(event, function() {
+                var instance = $(this).data('xzoom');
+                if ($('*').hasClass('xzoom-source')){
+                    instance.eventunbind()
+                    instance.closezoom()
+                } else {
+                    instance.eventdefault()
+                    instance.openzoom(event)
+                }
+            });
+        });
+
+    });
+})(jQuery);
+</script>
+
+<style>
+img {
+    width: 80vh;
+    margin-top:  50px;
+}
+.xzoom-source img, .xzoom-preview img, .xzoom-lens img {
+  display: block;
+  max-width: none;
+  max-height: none;
+  width: auto;
+  height: auto;
+  margin: 0px;
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}
+
+</style>
+
+
+</head>
+<body style='background-color: red'>
+<div id = "qa" style="text-align:center;">
+    <div id = '2'>
+        <img src="photo.webp"/>
+    </div>
+
+</div>
+
+</body>
+</html>

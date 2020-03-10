@@ -1,0 +1,68 @@
+# Attempts to fix the broken Qt setZoomFactor and zoomFactor functions - doesn't work I need to use Qt setZoomFactor and it still references og zoomFactor function
+# Grabs the default zoomFactor as set by Anki
+AZ_zoomFactor = AnkiWebView.zoomFactor(mw.web)
+
+# Overwrites Anki zoomFactor function to allow zooming
+# Could replace with QWebEngineView.zoomFactor() but has issues when changing states - resets to 1 even though zoom has not changed
+# Custom function trackets zoomFactor seprately
+
+def zoomFactor_overload(self):
+    print(AZ_zoomFactor)
+    return AZ_zoomFactor
+
+def setZoom_wrapper(self, val):
+    global AZ_zoomFactor
+    if val <= 5 and val >= 0.2:
+        AZ_zoomFactor = val       
+    return QWebEngineView.setZoomFactor(self, AZ_zoomFactor)
+
+AnkiWebView.zoomFactor = zoomFactor_overload
+AnkiWebView.setZoomFactor = setZoom_wrapper
+
+
+
+def zoomStateChange(new_state, old_state, *args):
+    global resetSentByZoom
+    global zoomActual
+    global prevStateChangeZoom
+    global currStateChangeZoom
+    if old_state == 'startup':
+        return
+
+    currStateChangeZoom = mw.web.zoomFactor()
+    #print("State zoom: " + str(prevStateChangeZoom)+ "->" + str(currStateChangeZoom))
+    #print(str(old_state) + " -> " + str(new_state) + ": " + str(resetSentByZoom))
+    #mw.setUpdatesEnabled(False)
+    #mw.setUpdatesEnabled(True)
+    #QTimer.singleShot(70, unpause)
+    
+    if resetSentByZoom: #assumes zoom is set to 1 and reset, so zoomActual == zoomFactor
+        #change_zoom(prevStateChangeZoom)
+        resetSentByZoom = False
+        print('***Zoom Adjust Done***' + str(prevStateChangeZoom)+ "->" + str(currStateChangeZoom))
+
+    elif currStateChangeZoom != prevStateChangeZoom:
+        print('***change detected***' + str(prevStateChangeZoom)+ "->" + str(currStateChangeZoom))
+        change_zoom(currStateChangeZoom**0.5) #1
+        resetSentByZoom = True
+        prevStateChangeZoom = currStateChangeZoom
+        mw.reset() #recursion
+    prevStateChangeZoom = currStateChangeZoom
+
+
+def change_zoom(new_zoom_level, fromHook=False):
+    state = mw.state
+    if state in ['deckBrowser', 'overview']:
+        config[ 'overview_zoom' ] = new_zoom_level
+    elif state == 'review':
+        config[ 'review_zoom' ] = new_zoom_level
+    mw.addonManager.writeConfig(__name__, config)
+
+    global zoomActual
+    global userZoomActual
+    pZoom = mw.web.zoomFactor()
+    mw.web.setZoomFactor( new_zoom_level )
+    zoomActual = zoomActual * (mw.web.zoomFactor()/pZoom)
+    if not fromHook:
+        userZoomActual = zoomActual
+    debugPrint('change_zoom, ' + str(fromHook))

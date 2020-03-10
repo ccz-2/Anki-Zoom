@@ -1,5 +1,5 @@
 # Anki Zoom
-# v1.1.2 3/8/2020
+# v1.2 3/10/2020
 # Copyright (c) 2020 Quip13 (random.emailforcrap@gmail.com)
 # Based in part on code by Damien Elmes <anki@ichi2.net>, Roland Sieker <ospalh@gmail.com> and github.com/krassowski
 # Big thanks to u/Glutanimate and u/yumenogotoshi for code suggestions
@@ -7,11 +7,49 @@
 
 from aqt import *
 from aqt import mw
+from aqt.reviewer import Reviewer
 from aqt.webview import AnkiWebView, QWebEngineView
 from aqt.qt import QEvent, Qt
 from anki.hooks import addHook, runHook, wrap
 from anki.hooks import *
 from anki.lang import _
+
+xzoom = open(os.path.join(os.path.dirname(__file__), 'xzoom_ndfs.js')).read()
+imgZoom = open(os.path.join(os.path.dirname(__file__), 'img_zoom.js')).read()
+def reviewer_initWeb_wrapper(*args):
+	mw.reviewer.web.eval(xzoom)
+	mw.reviewer.web.eval(imgZoom)
+	setImgZoom()
+
+mw.reviewer._initWeb = wrap(mw.reviewer._initWeb, reviewer_initWeb_wrapper)
+
+def toggle_img_zoom():
+	setImgZoom()
+	config = mw.addonManager.getConfig(__name__)
+	config[ 'img_zoom_enabled' ] = img_zoom.isChecked()
+	mw.addonManager.writeConfig(__name__, config)
+
+def setImgZoom():
+	if mw.state == 'review':
+		if img_zoom.isChecked():
+			mw.reviewer.web.eval("enableImgZoom();") #must wait until reviewer initialized before enabling
+		else:
+			mw.reviewer.web.eval("disableImgZoom();")
+
+imginZoom = False
+def linkHandler_wrapper(reviewer, url, _old):
+	global imginZoom
+	if "az_zooming" == url:
+		imginZoom = True
+	elif "az_done_zooming" == url:
+		imginZoom = False
+	else:
+		return _old(reviewer, url)
+
+Reviewer._linkHandler = wrap(Reviewer._linkHandler, linkHandler_wrapper, "around")
+
+def closeAllImgZoom():
+	mw.reviewer.web.eval('stopAllZoom();')	
 
 def configUpdated(*args):
 	global scrl_threshold
@@ -83,6 +121,8 @@ def set_save_zoom(new_state, old_state, *args):
 numDeg = 0
 def AnkiWebView_eventFilter_wrapper(self, obj, event):
 	global numDeg
+	if imginZoom:
+		return
 	if (mw.app.keyboardModifiers() == Qt.ControlModifier and
 			event.type() == QEvent.Wheel):
 		numDeg = numDeg + event.angleDelta().y()
@@ -106,27 +146,39 @@ def add_action(submenu, label, callback, shortcut=None):
 	submenu.addAction(action)
 	return action
 
-def setup_menu():
-	try:
+
+try:
+	mw.addon_view_menu
+except AttributeError:
+	mw.addon_view_menu = QMenu(_('&View'), mw)
+	mw.form.menubar.insertMenu(
+		mw.form.menuTools.menuAction(),
 		mw.addon_view_menu
-	except AttributeError:
-		mw.addon_view_menu = QMenu(_('&View'), mw)
-		mw.form.menubar.insertMenu(
-			mw.form.menuTools.menuAction(),
-			mw.addon_view_menu
-		)
+	)
 
-	mw.zoom_submenu = QMenu(_('&Zoom'), mw)
-	mw.addon_view_menu.addMenu(mw.zoom_submenu)
+mw.zoom_submenu = QMenu(_('&Zoom'), mw)
+mw.addon_view_menu.addMenu(mw.zoom_submenu)
 
-	add_action(mw.zoom_submenu, 'Zoom &In', zoom_in, ['Ctrl++','Ctrl+='])
-	add_action(mw.zoom_submenu, 'Zoom &Out', zoom_out, ['Ctrl+-'])
-	mw.zoom_submenu.addSeparator()
-	add_action(mw.zoom_submenu, '&Reset', reset_zoom, ['Ctrl+0'])
+add_action(mw.zoom_submenu, 'Zoom &In', zoom_in, ['Ctrl++','Ctrl+='])
+add_action(mw.zoom_submenu, 'Zoom &Out', zoom_out, ['Ctrl+-'])
+mw.zoom_submenu.addSeparator()
+add_action(mw.zoom_submenu, '&Reset', reset_zoom, ['Ctrl+0'])
+mw.zoom_submenu.addSeparator()
+
+img_zoom = QAction('Enable Image Zoom', mw)
+img_zoom.setCheckable(True)
+mw.zoom_submenu.addAction(img_zoom)
+img_zoom.triggered.connect(toggle_img_zoom)
+
+config = mw.addonManager.getConfig(__name__)
+img_zoom.setChecked(config[ 'img_zoom_enabled' ])
+
 
 def onClose():
 	set_save_zoom(None,mw.state)
 
 addHook("afterStateChange", set_save_zoom)
 addHook("unloadProfile", onClose)
-setup_menu()
+
+addHook("showQuestion", closeAllImgZoom)
+addHook("showAnswer", closeAllImgZoom)
