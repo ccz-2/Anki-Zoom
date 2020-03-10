@@ -18,8 +18,8 @@ Does what it says - enables zoom for current Anki versions (v2.1.15+). Built upo
 
 For more GUI tweaks, check out my other addon: <a href="https://ankiweb.net/shared/info/1049863218" rel="nofollow">No Distractions Full Screen</a>
 
-<b><code>Changelog:</code></b>
-3/8/2020 v1.1.2: Fixes bug where zoom state would not save upon close. Performance improvements
-3/2/2020 v1.1.1: Fixed bug where screen would freeze after certain actions
-3/2/2020 v1.1: Much more streamlined code for zoom management and tracking. Event-listener changed to use inbuilt Anki event listener(big thanks to u/Glutanimate and u/yumenogotoshi for code suggestions). Added zoom interval and scroll threshold config
-3/1/2020 v1.0: Initial release
+<b><code>Changelog:</code></b>  
+3/8/2020 v1.1.2: Fixes bug where zoom state would not save upon close. Performance improvements  
+3/2/2020 v1.1.1: Fixed bug where screen would freeze after certain actions  
+3/2/2020 v1.1: Much more streamlined code for zoom management and tracking. Event-listener changed to use inbuilt Anki event   listener(big thanks to u/Glutanimate and u/yumenogotoshi for code suggestions). Added zoom interval and scroll threshold config  
+3/1/2020 v1.0: Initial release  
