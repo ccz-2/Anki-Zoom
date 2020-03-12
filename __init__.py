@@ -14,7 +14,7 @@ from anki.hooks import addHook, runHook, wrap
 from anki.hooks import *
 from anki.lang import _
 
-xzoom = open(os.path.join(os.path.dirname(__file__), 'xzoom_ndfs.js')).read()
+xzoom = open(os.path.join(os.path.dirname(__file__), 'xzoom_az.js')).read()
 imgZoom = open(os.path.join(os.path.dirname(__file__), 'img_zoom.js')).read()
 def reviewer_initWeb_wrapper(*args):
 	mw.reviewer.web.eval(xzoom)
@@ -89,34 +89,37 @@ def change_zoom_by(interval):
 def change_zoom(zoom_lvl):
 	mw.web.setZoomFactor(zoom_lvl)
 
+last_state = mw.state #reported states through hook can have erroneous values - tracked manually
 def set_save_zoom(new_state, old_state, *args):
-	if old_state == new_state: #skips if reset
+	global last_state
+	if last_state == mw.state: #skips if reset
 		return
 
 	#Saves state zoom
 	old_state_zoom = QWebEngineView.zoomFactor(mw.web)
-	if old_state == 'deckBrowser':
+	if last_state == 'deckBrowser':
 		config[ 'deckBrowser_zoom' ] = old_state_zoom
-	elif old_state == 'overview':
+	elif last_state == 'overview':
 		config[ 'overview_zoom' ] = old_state_zoom
-	elif old_state == 'review':
+	elif last_state == 'review':
 		config[ 'review_zoom' ] = old_state_zoom
 	mw.addonManager.writeConfig(__name__, config)
-
 
 	mw.setUpdatesEnabled(False) #prevents flickering
 
 	#Applies state zoom
-	if new_state == 'deckBrowser':
+	if mw.state == 'deckBrowser':
 		change_zoom( config[ 'deckBrowser_zoom' ] )
-	elif new_state == 'overview':
+	elif mw.state == 'overview':
 		change_zoom( config[ 'overview_zoom' ] )
-	elif new_state == 'review':
+	elif mw.state == 'review':
 		change_zoom( config[ 'review_zoom' ] )
 
 	def unpause():
 		mw.setUpdatesEnabled(True)
 	QTimer.singleShot(150, unpause) #prevents flickering
+
+	last_state = mw.state
 
 numDeg = 0
 def AnkiWebView_eventFilter_wrapper(self, obj, event):

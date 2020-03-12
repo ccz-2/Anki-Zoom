@@ -1,15 +1,19 @@
 //Anki Zoom v1.2
 var timer;
 $("body").on('DOMSubtreeModified', '#qa', function() {
-  applyImgZoom();
   clearTimeout(timer);
   timer = setTimeout(function(){
+    applyImgZoom();
   }, 50); //prevents overzealous updates, since selector grabs multiple events per card change
 });
 
 var imgZoomEnabled = true;
 function applyImgZoom() {
   $('#qa img').each(function() {
+    var instance = $(this).data('xzoom');
+    if (!!instance) { //if already exists, skip
+      return
+    }
     src = $(this).attr("src");
     $(this).attr("xoriginal", src)
     var instance = $(this).xzoom({
@@ -23,9 +27,7 @@ function applyImgZoom() {
         lensCollision: true,
         hover: true,
     });
-    if(!!instance){
-      instance.eventunbind();
-    }
+    instance.eventunbind();
     $(this).click(event, function() {
         var instance = $(this).data('xzoom');
         if ($('*').hasClass('xzoom-source')){
@@ -40,6 +42,7 @@ function applyImgZoom() {
 };
 
 function enableImgZoom() {
+  console.log('enabled')
   imgZoomEnabled = true;
 };
 
