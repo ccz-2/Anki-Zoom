@@ -16,12 +16,16 @@ from anki.lang import _
 
 xzoom = open(os.path.join(os.path.dirname(__file__), 'xzoom_az.js')).read()
 imgZoom = open(os.path.join(os.path.dirname(__file__), 'img_zoom.js')).read()
-def reviewer_initWeb_wrapper(*args):
-	mw.reviewer.web.eval(xzoom)
-	mw.reviewer.web.eval(imgZoom)
-	setImgZoom()
 
-mw.reviewer._initWeb = wrap(mw.reviewer._initWeb, reviewer_initWeb_wrapper)
+def reviewer_initWeb_wrapper(func):
+	def _initWeb(*args):
+		func()
+		mw.reviewer.web.eval(xzoom)
+		mw.reviewer.web.eval(imgZoom)
+		setImgZoom()
+	return _initWeb
+
+mw.reviewer._initWeb = reviewer_initWeb_wrapper(mw.reviewer._initWeb)
 
 def toggle_img_zoom():
 	setImgZoom()
