@@ -1,78 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>xZoom</title>
-<link type="text/css" rel="stylesheet" media="all" href="https://unpkg.com/xzoom/dist/xzoom.css" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>xZoom</title>
+  <link type="text/css" rel="stylesheet" media="all" href="https://unpkg.com/xzoom/dist/xzoom.css" />
 
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script type="text/javascript" src="xzoom_ndfs.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+<!--
+<script type="text/javascript" src="jquery.panzoom.min.js"></script>
+-->
+<script src='panzoom.js'></script>
 <script type="text/javascript">
-(function ($) {
+  (function ($) {
     $(document).ready(function() {
 
-        //Multiple Zooms on one page
-        $('#qa img').each(function() {
-            src = $(this).attr("src");
-            $(this).attr("xoriginal", src)
-            var instance = $(this).xzoom({
-                zoomWidth: Number.MAX_SAFE_INTEGER,
-                zoomHeight: Number.MAX_SAFE_INTEGER,
-                position: 'inside',
-                defaultScale: 2,
-                lens: "#ffffff",
-                smoothZoomMove: 3,
-                smoothScale: 6,
-                lensCollision: true,
-                hover: true,
-                openOnSmall: false
-            });
-            instance.eventunbind()
-            $(this).click(event, function() {
-                var instance = $(this).data('xzoom');
-                if ($('*').hasClass('xzoom-source')){
-                    instance.eventunbind()
-                    instance.closezoom()
-                } else {
-                    instance.eventdefault()
-                    instance.openzoom(event)
-                }
-            });
-        });
+      var element = document.querySelector('#qa')
+      instance = panzoom(element, {
+      });
+      var rmbDown = false;
+      instance.pause();
+      $(document).keydown(function(event){
+        if (event.keyCode == 18){ //alt
+          instance.resume();
+        }
+      });
+      $(document).keyup(function(event){
+        if (event.keyCode == 18){ //alt
+          instance.pause();
+        }
+      });
+      document.addEventListener('mousedown', function(event){
+       if (event.button == 2 && !rmbDown){ //RMB
+        rmbDown = true;
+        instance.resume();
+        new_event = new MouseEvent(event.type, event)
+        new_event.repeat = true;
+        element.dispatchEvent(new_event);
+
+        console.log(rmbDown)
+      }
+    });
+      document.addEventListener('mouseup', function(event){
+       if (event.button == 2){
+                rmbDown = false;
+        if (!event.altKey){
+        instance.pause()
+        }
+
+        console.log(rmbDown)
+      }
+    });
 
     });
-})(jQuery);
+  })(jQuery);
 </script>
 
+
+
 <style>
-img {
-    width: 80vh;
+  img {
+    width: 200px;
     margin-top:  50px;
-}
-.xzoom-source img, .xzoom-preview img, .xzoom-lens img {
-  display: block;
-  max-width: none;
-  max-height: none;
-  width: auto;
-  height: auto;
-  margin: 0px;
-  -webkit-transition: none;
-  -moz-transition: none;
-  -o-transition: none;
-  transition: none;
-}
-
+  }
+  body {
+    background-size: 40px 40px;
+    background-image:
+    linear-gradient(to right, grey 1px, transparent 1px),
+    linear-gradient(to bottom, grey 1px, transparent 1px);
+  }
 </style>
-
-
 </head>
-<body style='background-color: red'>
-<div id = "qa" style="text-align:center;">
+
+
+<body style='background-color: cadetblue'>
+  <div id = "qa" style="text-align:center;">
     <div id = '2'>
-        <img src="photo.webp"/>
+      <img src="photo.webp"/>
     </div>
 
-</div>
+  </div>
 
 </body>
 </html>
