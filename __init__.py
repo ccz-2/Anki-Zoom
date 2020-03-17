@@ -14,7 +14,7 @@ from anki.hooks import addHook, runHook, wrap
 from anki.hooks import *
 from anki.lang import _
 
-xzoom = open(os.path.join(os.path.dirname(__file__), 'xzoom_az.js')).read()
+xzoom = open(os.path.join(os.path.dirname(__file__), 'panzoom_az.js')).read()
 imgZoom = open(os.path.join(os.path.dirname(__file__), 'img_zoom.js')).read()
 
 def reviewer_initWeb_wrapper(func):
@@ -39,21 +39,6 @@ def setImgZoom():
 			mw.reviewer.web.eval("enableImgZoom();") #must wait until reviewer initialized before enabling
 		else:
 			mw.reviewer.web.eval("disableImgZoom();")
-
-imginZoom = False
-def linkHandler_wrapper(reviewer, url, _old):
-	global imginZoom
-	if "az_zooming" == url:
-		imginZoom = True
-	elif "az_done_zooming" == url:
-		imginZoom = False
-	else:
-		return _old(reviewer, url)
-
-Reviewer._linkHandler = wrap(Reviewer._linkHandler, linkHandler_wrapper, "around")
-
-def closeAllImgZoom():
-	mw.reviewer.web.eval('stopAllZoom();')	
 
 def configUpdated(*args):
 	global scrl_threshold
@@ -128,8 +113,6 @@ def set_save_zoom(new_state, old_state, *args):
 numDeg = 0
 def AnkiWebView_eventFilter_wrapper(self, obj, event):
 	global numDeg
-	if imginZoom:
-		return
 	if (mw.app.keyboardModifiers() == Qt.ControlModifier and
 			event.type() == QEvent.Wheel):
 		numDeg = numDeg + event.angleDelta().y()
@@ -186,6 +169,3 @@ def onClose():
 
 addHook("afterStateChange", set_save_zoom)
 addHook("unloadProfile", onClose)
-
-addHook("showQuestion", closeAllImgZoom)
-addHook("showAnswer", closeAllImgZoom)
