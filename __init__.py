@@ -70,6 +70,7 @@ def reset_zoom(state=None, *args):
 		change_zoom( config[ 'overview_zoom_default' ] )
 	elif state == 'review':
 		change_zoom( config[ 'review_zoom_default' ] )
+		mw.reviewer.web.eval("applyZoom()")
 
 def change_zoom_by(interval):
 	currZoom = QWebEngineView.zoomFactor(mw.web) #use non-overridden method
