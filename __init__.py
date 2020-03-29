@@ -1,5 +1,5 @@
 # Anki Zoom
-# v1.1.2 3/8/2020
+# v1.1.3 3/28/2020
 # Copyright (c) 2020 Quip13 (random.emailforcrap@gmail.com)
 # Based in part on code by Damien Elmes <anki@ichi2.net>, Roland Sieker <ospalh@gmail.com> and github.com/krassowski
 # Big thanks to u/Glutanimate and u/yumenogotoshi for code suggestions
@@ -12,6 +12,7 @@ from aqt.qt import QEvent, Qt
 from anki.hooks import addHook, runHook, wrap
 from anki.hooks import *
 from anki.lang import _
+from .toolbar import *
 
 def configUpdated(*args):
 	global scrl_threshold
@@ -110,7 +111,7 @@ def setup_menu():
 	try:
 		mw.addon_view_menu
 	except AttributeError:
-		mw.addon_view_menu = QMenu(_('&View'), mw)
+		mw.addon_view_menu = getMenu(mw, "&View")
 		mw.form.menubar.insertMenu(
 			mw.form.menuTools.menuAction(),
 			mw.addon_view_menu
