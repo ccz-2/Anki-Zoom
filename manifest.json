@@ -5,5 +5,5 @@
     "author": "Quip13",
     "human_version": "v1.1.3",
     "homepage": "https://ankiweb.net/shared/info/538879081",
-    "conflicts": [ "1846592880" ]
+    "conflicts": [ "1846592880", "Anki-Zoom_build" ]
 }
