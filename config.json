@@ -7,5 +7,5 @@
    "deckBrowser_zoom_default": 1.0,
    "scroll_sensitivity": 120,
    "zoom_step": 1.1,
-   "zoom_lvl_tooltip_enabled": false
+   "zoom_lvl_tooltip_enabled": true
 }
