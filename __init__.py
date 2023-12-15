@@ -104,8 +104,8 @@ def set_save_zoom(new_state, old_state, *args):
 numDeg = 0
 def AnkiWebView_eventFilter_wrapper(self, obj, event):
 	global numDeg
-	if (mw.app.keyboardModifiers() == Qt.ControlModifier and
-			event.type() == QEvent.Wheel):
+	if (mw.app.keyboardModifiers() == Qt.KeyboardModifier.ControlModifier and
+			event.type() == QEvent.Type.Wheel):
 		numDeg = numDeg + event.angleDelta().y()
 		if numDeg >= scrl_threshold:
 			zoom_in()
